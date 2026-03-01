@@ -1,0 +1,46 @@
+context.modules = [
+    {
+        name = libpipewire-module-echo-cancel
+        args = {
+            library.name = aec/libspa-aec-webrtc
+            capture.props = {
+                node.name = "aec-input"
+                node.passive = true
+            }
+            source.props = {
+                node.name = "aec-source"
+            }
+        }
+    },
+    {
+        name = libpipewire-module-filter-chain
+        args = {
+            node.description = "DeepFilterNet Noise Canceling Source"
+            media.name = "DeepFilterNet Noise Canceling Source"
+            filter.graph = {
+                nodes = [
+                    {
+                        type = ladspa
+                        name = "DeepFilterNet Mono"
+                        plugin = "/home/sb/.ladspa/libdeep_filter_ladspa.so"
+                        label = "deep_filter_mono"
+                        control = {
+                            "Attenuation Limit (dB)" = 100
+                        }
+                    }
+                ]
+            }
+            audio.rate = 48000
+            audio.position = [ MONO ]
+            capture.props = {
+                node.name = "deepfilternet-input"
+                node.target = "aec-source"
+                node.passive = true
+            }
+            playback.props = {
+                node.name = "deepfilternet-output"
+                media.class = Audio/Source
+            }
+        }
+    }
+]
