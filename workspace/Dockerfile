@@ -1,0 +1,149 @@
+# -------------------------------------------------------------------------------------------------
+# BUILD
+# -------------------------------------------------------------------------------------------------
+FROM debian:stable-slim AS build
+
+ARG GO_LANG_URL
+ARG GO_LANG_CHECKSUM
+ARG MAVEN_URL
+ARG MAVEN_CHECKSUM
+ARG GRADLE_URL
+ARG GRADLE_CHECKSUM
+ARG NODEJS_URL
+ARG NODEJS_CHECKSUM
+
+WORKDIR /build
+
+RUN apt-get update && apt-get full-upgrade -y && \
+    apt-get install -y wget xz-utils unzip ca-certificates
+
+# Golang
+RUN echo "[-] Download Go from go.dev" && \
+    wget "${GO_LANG_URL}" -O go.tar.gz && \
+    echo "[-] Verifying checksum..." && \
+    echo "${GO_LANG_CHECKSUM}  go.tar.gz" | sha256sum -c - && \
+    echo "[-] Checksum OK" && \
+    tar -xzvf go.tar.gz
+
+# Maven
+RUN echo "[-] Download Maven from apache.org" && \
+    wget "${MAVEN_URL}" -O maven.tar.gz && \
+    echo "[-] Verifying checksum..." && \
+    echo "${MAVEN_CHECKSUM}  maven.tar.gz" | sha512sum -c - && \
+    echo "[-] Checksum OK" && \
+    mkdir maven && tar -xzvf maven.tar.gz -C ./maven --strip-components=1
+
+# Gradle
+RUN echo "[-] Download Gradle from gradle.org" && \
+    wget "${GRADLE_URL}" -O gradle.zip && \
+    echo "[-] Verifying checksum..." && \
+    echo "${GRADLE_CHECKSUM}  gradle.zip" | sha256sum -c - && \
+    echo "[-] Checksum OK" && \
+    mkdir tmp && unzip -d ./tmp gradle.zip && \
+    mv ./tmp/* gradle
+
+# Node.js
+RUN echo "[-] Download Node.js from nodejs.org" && \
+    wget "${NODEJS_URL}" -O node.tar.xz && \
+    echo "[-] Verifying checksum..." && \
+    echo "${NODEJS_CHECKSUM}  node.tar.xz" | sha256sum -c - && \
+    echo "[-] Checksum OK" && \
+    mkdir node && tar -xvf node.tar.xz -C ./node --strip-components=1
+
+# -------------------------------------------------------------------------------------------------
+# WORKSPACE
+# -------------------------------------------------------------------------------------------------
+FROM debian:stable
+
+ARG USER_PASSWORD
+ARG JDK_URL
+ARG JDK_CHECKSUM
+
+# Environment variables
+ENV LANG=en_US.UTF-8 \
+    DEBIAN_FRONTEND=noninteractive \
+    VIRTUAL_ENV_DISABLE_PROMPT=1 \
+    TERM=xterm-256color
+
+RUN sed -i 's|Components: main|Components: main contrib non-free non-free-firmware|' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && apt-get full-upgrade -y && \
+    # Install Locales
+    apt-get install -y locales && \
+    sed -i 's|# en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|' /etc/locale.gen && \
+    locale-gen && \
+    # Install base packages
+    apt-get install -y \
+    sudo bash-completion ca-certificates vim gnupg alsa-utils pipewire pipewire-pulse pipewire-alsa wget curl git git-lfs ffmpeg libportaudio2 clamav extrepo \
+    # C/C++
+    build-essential gdb \
+    # Python
+    python3 python3-full python3-dev \
+    # Rust
+    rustup \
+    # ------------------------------------
+    # End of installations
+    && \
+    # ------------------------------------
+    # Update ClamAV databases
+    freshclam && \
+    # Bash completion
+    rm /etc/apt/apt.conf.d/docker-clean && \
+    # Clean trash and cache
+    apt-get autoclean -y && apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    # Add user
+    useradd -m -s /bin/bash friday && \
+    if [ -z "${USER_PASSWORD:-}" ]; then \
+    echo "USER_PASSWORD is not set" >&2; exit 1; \
+    fi && \
+    printf 'friday:%s\n' "${USER_PASSWORD}" | chpasswd && \
+    usermod -aG sudo friday && \
+    usermod -aG audio friday
+
+# Setup JDK
+WORKDIR /build
+RUN wget "${JDK_URL}" -O jdk.deb && \
+    echo "${JDK_CHECKSUM}  jdk.deb" | sha256sum -c - && \
+    apt-get update && apt-get install -y ./jdk.deb && rm jdk.deb && \
+    rm -rf /var/lib/apt/lists/*
+
+# Setup Golang
+COPY --from=build /build/go /opt/go
+ENV PATH=${PATH}:/opt/go/bin
+
+# Setup Maven
+COPY --from=build /build/maven /opt/maven
+ENV PATH=${PATH}:/opt/maven/bin
+
+# Setup Gradle
+COPY --from=build /build/gradle /opt/gradle
+ENV PATH=${PATH}:/opt/gradle/bin
+
+# Setup Node.js
+COPY --from=build /build/node /opt/node
+ENV PATH=${PATH}:/opt/node/bin
+
+# Setup NVIDIA Container Toolkit
+RUN sed -i 's|# - contrib|- contrib|' /etc/extrepo/config.yaml && \
+    sed -i 's|# - non-free|- non-free|' /etc/extrepo/config.yaml && \
+    apt-get update && extrepo enable nvidia-cuda && \
+    apt-get update && apt-get install -y cuda-toolkit && \
+    rm -rf /var/lib/apt/lists/*
+ENV PATH=${PATH}:/usr/local/cuda/bin
+
+USER friday
+
+RUN gpg --list-key
+
+# Setup Rust
+RUN rustup default stable
+
+ENV XDG_RUNTIME_DIR=/run/user/1000 \
+    SSH_AUTH_SOCK=/run/user/1000/keyring/ssh \
+    GPG_AGENT_INFO=/run/user/1000/gnupg/S.gpg-agent:0:1
+
+COPY --chown=friday:friday .vimrc /home/friday
+COPY --chown=friday:friday .bashrc /home/friday
+
+RUN mkdir /home/friday/workspace
+WORKDIR /home/friday/workspace
