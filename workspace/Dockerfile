@@ -100,13 +100,6 @@ RUN sed -i 's|Components: main|Components: main contrib non-free non-free-firmwa
     usermod -aG sudo friday && \
     usermod -aG audio friday
 
-# Setup JDK
-WORKDIR /build
-RUN wget "${JDK_URL}" -O jdk.deb && \
-    echo "${JDK_CHECKSUM}  jdk.deb" | sha256sum -c - && \
-    apt-get update && apt-get install -y ./jdk.deb && rm jdk.deb && \
-    rm -rf /var/lib/apt/lists/*
-
 # Setup Golang
 COPY --from=build /build/go /opt/go
 ENV PATH=${PATH}:/opt/go/bin
