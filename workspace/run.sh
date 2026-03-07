@@ -1,5 +1,5 @@
 #!/bin/bash
-podman run -it \
+docker run -it \
     --userns=keep-id \
     --mount type=bind,src=$XDG_RUNTIME_DIR,dst=/run/user/1000,rw,rslave \
     --mount type=bind,src=$HOME/.gitconfig,dst=/home/friday/.gitconfig,readonly,rslave \
