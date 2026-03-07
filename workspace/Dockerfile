@@ -56,8 +56,6 @@ RUN echo "[-] Download Node.js from nodejs.org" && \
 FROM debian:stable
 
 ARG USER_PASSWORD
-ARG JDK_URL
-ARG JDK_CHECKSUM
 
 # Environment variables
 ENV LANG=en_US.UTF-8 \
