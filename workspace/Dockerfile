@@ -71,7 +71,7 @@ RUN sed -i 's|Components: main|Components: main contrib non-free non-free-firmwa
     locale-gen && \
     # Install base packages
     apt-get install -y \
-    sudo bash-completion ca-certificates vim gnupg alsa-utils pipewire pipewire-pulse pipewire-alsa wget curl git git-lfs ffmpeg libportaudio2 clamav extrepo \
+    sudo bash-completion ca-certificates vim gnupg alsa-utils pipewire pipewire-pulse pipewire-alsa wget curl git git-lfs ffmpeg libportaudio2 openjdk-21-jdk clamav extrepo \
     # C/C++
     build-essential gdb \
     # Python
