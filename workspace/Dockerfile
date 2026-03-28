@@ -122,6 +122,11 @@ RUN sed -i 's|# - contrib|- contrib|' /etc/extrepo/config.yaml && \
     rm -rf /var/lib/apt/lists/*
 ENV PATH=${PATH}:/usr/local/cuda/bin
 
+# Setup PostgreSQL
+RUN apt-get update && extrepo enable postgresql && \
+    apt-get update && apt-get install -y install postgresql-client-18 && \
+    rm -rf /var/lib/apt/lists/*
+
 USER friday
 
 RUN gpg --list-key
