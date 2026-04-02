@@ -98,22 +98,6 @@ RUN sed -i 's|Components: main|Components: main contrib non-free non-free-firmwa
     usermod -aG sudo friday && \
     usermod -aG audio friday
 
-# Setup Golang
-COPY --from=build /build/go /opt/go
-ENV PATH=${PATH}:/opt/go/bin
-
-# Setup Maven
-COPY --from=build /build/maven /opt/maven
-ENV PATH=${PATH}:/opt/maven/bin
-
-# Setup Gradle
-COPY --from=build /build/gradle /opt/gradle
-ENV PATH=${PATH}:/opt/gradle/bin
-
-# Setup Node.js
-COPY --from=build /build/node /opt/node
-ENV PATH=${PATH}:/opt/node/bin
-
 # Setup NVIDIA Container Toolkit
 RUN sed -i 's|# - contrib|- contrib|' /etc/extrepo/config.yaml && \
     sed -i 's|# - non-free|- non-free|' /etc/extrepo/config.yaml && \
@@ -124,12 +108,31 @@ ENV PATH=${PATH}:/usr/local/cuda/bin
 
 # Setup PostgreSQL
 RUN apt-get update && extrepo enable postgresql && \
-    apt-get update && apt-get install -y install postgresql-client-18 && \
+    apt-get update && apt-get install -y postgresql-client-18 && \
     rm -rf /var/lib/apt/lists/*
 
 USER friday
 
 RUN gpg --list-key
+
+# Setup Golang
+COPY --chown=friday:friday --from=build /build/go /home/friday/.local/bin/go
+ENV PATH=${PATH}:/home/friday/.local/bin/go/bin
+
+# Setup Maven
+COPY --chown=friday:friday --from=build /build/maven /home/friday/.local/bin/maven
+ENV PATH=${PATH}:/home/friday/.local/bin/maven/bin
+
+# Setup Gradle
+COPY --chown=friday:friday --from=build /build/gradle /home/friday/.local/bin/gradle
+ENV PATH=${PATH}:/home/friday/.local/bin/gradle/bin
+
+# Setup Node.js
+COPY --chown=friday:friday --from=build /build/node /home/friday/.local/bin/node
+ENV PATH=${PATH}:/home/friday/.local/bin/node/bin
+
+# Setup SFW
+RUN npm i -g sfw
 
 # Setup Rust
 RUN rustup default stable

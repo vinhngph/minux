@@ -93,6 +93,9 @@ fi
 #alias l='ls -CF'
 alias clamscan='clamscan -r'
 alias ll='ls -Al'
+alias npm='sfw npm'
+alias pip='sfw pip'
+alias cargo='sfw cargo'
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
