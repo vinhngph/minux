@@ -19,7 +19,7 @@ RUN apt-get update && apt-get full-upgrade -y && \
 
 # Golang
 RUN echo "[-] Download Go from go.dev" && \
-    wget "${GO_LANG_URL}" -O go.tar.gz && \
+    wget -4 "${GO_LANG_URL}" -O go.tar.gz && \
     echo "[-] Verifying checksum..." && \
     echo "${GO_LANG_CHECKSUM}  go.tar.gz" | sha256sum -c - && \
     echo "[-] Checksum OK" && \
@@ -27,7 +27,7 @@ RUN echo "[-] Download Go from go.dev" && \
 
 # Maven
 RUN echo "[-] Download Maven from apache.org" && \
-    wget "${MAVEN_URL}" -O maven.tar.gz && \
+    wget -4 "${MAVEN_URL}" -O maven.tar.gz && \
     echo "[-] Verifying checksum..." && \
     echo "${MAVEN_CHECKSUM}  maven.tar.gz" | sha512sum -c - && \
     echo "[-] Checksum OK" && \
@@ -35,7 +35,7 @@ RUN echo "[-] Download Maven from apache.org" && \
 
 # Gradle
 RUN echo "[-] Download Gradle from gradle.org" && \
-    wget "${GRADLE_URL}" -O gradle.zip && \
+    wget -4 "${GRADLE_URL}" -O gradle.zip && \
     echo "[-] Verifying checksum..." && \
     echo "${GRADLE_CHECKSUM}  gradle.zip" | sha256sum -c - && \
     echo "[-] Checksum OK" && \
@@ -44,7 +44,7 @@ RUN echo "[-] Download Gradle from gradle.org" && \
 
 # Node.js
 RUN echo "[-] Download Node.js from nodejs.org" && \
-    wget "${NODEJS_URL}" -O node.tar.xz && \
+    wget -4 "${NODEJS_URL}" -O node.tar.xz && \
     echo "[-] Verifying checksum..." && \
     echo "${NODEJS_CHECKSUM}  node.tar.xz" | sha256sum -c - && \
     echo "[-] Checksum OK" && \
