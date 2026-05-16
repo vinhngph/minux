@@ -11,6 +11,8 @@ ARG GRADLE_URL
 ARG GRADLE_CHECKSUM
 ARG NODEJS_URL
 ARG NODEJS_CHECKSUM
+ARG NVIM_URL
+ARG NVIM_CHECKSUM
 
 WORKDIR /build
 
@@ -49,6 +51,14 @@ RUN echo "[-] Download Node.js from nodejs.org" && \
     echo "${NODEJS_CHECKSUM}  node.tar.xz" | sha256sum -c - && \
     echo "[-] Checksum OK" && \
     mkdir node && tar -xvf node.tar.xz -C ./node --strip-components=1
+
+# Neovim
+RUN echo "[-] Download Neovim from GitHub:neovim/neovim" && \
+    wget -4 "${NVIM_URL}" -O nvim-linux-x86_64.tar.gz && \
+    echo "[-] Verifying checksum..." && \
+    echo "${NVIM_CHECKSUM}  nvim-linux-x86_64.tar.gz" | sha256sum -c - && \
+    echo "[-] Checksum OK" && \
+    mkdir nvim && tar -xvf nvim-linux-x86_64.tar.gz -C ./nvim --strip-components=1
 
 # -------------------------------------------------------------------------------------------------
 # WORKSPACE
@@ -113,8 +123,6 @@ RUN apt-get update && extrepo enable postgresql && \
 
 USER friday
 
-RUN gpg --list-key
-
 # Setup Golang
 COPY --chown=friday:friday --from=build /build/go /home/friday/.local/bin/go
 ENV PATH=${PATH}:/home/friday/.local/bin/go/bin
@@ -131,6 +139,10 @@ ENV PATH=${PATH}:/home/friday/.local/bin/gradle/bin
 COPY --chown=friday:friday --from=build /build/node /home/friday/.local/bin/node
 ENV PATH=${PATH}:/home/friday/.local/bin/node/bin
 
+# Setup Neovim
+COPY --chown=friday:friday --from=build /build/nvim /home/friday/.local/bin/nvim
+ENV PATH=${PATH}:/home/friday/.local/bin/nvim/bin
+
 # Setup SFW
 RUN npm i -g sfw
 
@@ -144,5 +156,9 @@ ENV XDG_RUNTIME_DIR=/run/user/1000 \
 COPY --chown=friday:friday .vimrc /home/friday
 COPY --chown=friday:friday .bashrc /home/friday
 
-RUN mkdir /home/friday/workspace
+
+RUN mkdir /home/friday/.ssh && \
+    mkdir /home/friday/.gnupg && \
+    mkdir /home/friday/workspace
+
 WORKDIR /home/friday/workspace
