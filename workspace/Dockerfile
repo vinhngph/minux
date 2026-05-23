@@ -52,14 +52,6 @@ RUN echo "[-] Download Node.js from nodejs.org" && \
     echo "[-] Checksum OK" && \
     mkdir node && tar -xvf node.tar.xz -C ./node --strip-components=1
 
-# Neovim
-RUN echo "[-] Download Neovim from GitHub:neovim/neovim" && \
-    wget -4 "${NVIM_URL}" -O nvim-linux-x86_64.tar.gz && \
-    echo "[-] Verifying checksum..." && \
-    echo "${NVIM_CHECKSUM}  nvim-linux-x86_64.tar.gz" | sha256sum -c - && \
-    echo "[-] Checksum OK" && \
-    mkdir nvim && tar -xvf nvim-linux-x86_64.tar.gz -C ./nvim --strip-components=1
-
 # -------------------------------------------------------------------------------------------------
 # WORKSPACE
 # -------------------------------------------------------------------------------------------------
@@ -138,10 +130,6 @@ ENV PATH=${PATH}:/home/friday/.local/bin/gradle/bin
 # Setup Node.js
 COPY --chown=friday:friday --from=build /build/node /home/friday/.local/bin/node
 ENV PATH=${PATH}:/home/friday/.local/bin/node/bin
-
-# Setup Neovim
-COPY --chown=friday:friday --from=build /build/nvim /home/friday/.local/bin/nvim
-ENV PATH=${PATH}:/home/friday/.local/bin/nvim/bin
 
 # Setup SFW
 RUN npm i -g sfw
