@@ -151,7 +151,8 @@ RUN rustup default stable
 
 ENV XDG_RUNTIME_DIR=/run/user/1000 \
     SSH_AUTH_SOCK=/run/user/1000/keyring/ssh \
-    GPG_AGENT_INFO=/run/user/1000/gnupg/S.gpg-agent:0:1
+    GPG_AGENT_INFO=/run/user/1000/gnupg/S.gpg-agent:0:1 \
+    COLORTERM=truecolor
 
 COPY --chown=friday:friday .vimrc /home/friday
 COPY --chown=friday:friday .bashrc /home/friday
