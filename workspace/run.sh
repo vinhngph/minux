@@ -1,5 +1,5 @@
 #!/bin/bash
-podman run -it \
+podman run -d \
     -p 2222:22 \
     -v workspace-ssh:/home/friday/.ssh \
     -v workspace-gpg:/home/friday/.gnupg \

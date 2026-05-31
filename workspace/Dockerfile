@@ -11,8 +11,6 @@ ARG GRADLE_URL
 ARG GRADLE_CHECKSUM
 ARG NODEJS_URL
 ARG NODEJS_CHECKSUM
-ARG NVIM_URL
-ARG NVIM_CHECKSUM
 
 WORKDIR /build
 
@@ -73,7 +71,7 @@ RUN sed -i 's|Components: main|Components: main contrib non-free non-free-firmwa
     locale-gen && \
     # Install base packages
     apt-get install -y \
-    sudo bash-completion ca-certificates vim gnupg alsa-utils pipewire pipewire-pulse pipewire-alsa wget curl git git-lfs ffmpeg libportaudio2 openjdk-21-jdk clamav extrepo \
+    sudo bash-completion ca-certificates vim gnupg alsa-utils pipewire pipewire-pulse pipewire-alsa wget curl git git-lfs ffmpeg libportaudio2 openjdk-21-jdk clamav extrepo openssh-server \
     # C/C++
     build-essential gdb \
     # Python
@@ -113,6 +111,9 @@ RUN apt-get update && extrepo enable postgresql && \
     apt-get update && apt-get install -y postgresql-client-18 && \
     rm -rf /var/lib/apt/lists/*
 
+# Modify sudoers
+RUN echo "Defaults    timestamp_timeout=0" > /etc/sudoers.d/90-custom-sudoers
+
 USER friday
 
 # Setup Golang
@@ -151,3 +152,7 @@ RUN mkdir /home/friday/.ssh && \
     mkdir /home/friday/workspace
 
 WORKDIR /home/friday/workspace
+
+USER root
+
+CMD ["/usr/sbin/sshd", "-D"]
