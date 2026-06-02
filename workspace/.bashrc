@@ -91,6 +91,8 @@ export PATH=$PATH:$HOME/.local/bin/go/bin
 export PATH=$PATH:$HOME/.local/bin/gradle/bin
 export PATH=$PATH:$HOME/.local/bin/node/bin
 
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
 # some more ls aliases
 #alias ll='ls -l'
 #alias la='ls -A'
