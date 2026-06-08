@@ -13,6 +13,10 @@ set number
 set tabstop=4
 set shiftwidth=4
 
+let &t_SI = "\<Esc>[5 q"
+let &t_EI = "\<Esc>[1 q"
+let &t_SR = "\<Esc>[3 q"
+
 syntax on
 filetype plugin indent on
-colorscheme slate 
+colorscheme slate
