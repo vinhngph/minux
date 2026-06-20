@@ -9,8 +9,6 @@ ARG MAVEN_URL
 ARG MAVEN_CHECKSUM
 ARG GRADLE_URL
 ARG GRADLE_CHECKSUM
-ARG NODEJS_URL
-ARG NODEJS_CHECKSUM
 
 WORKDIR /build
 
@@ -41,14 +39,6 @@ RUN echo "[-] Download Gradle from gradle.org" && \
     echo "[-] Checksum OK" && \
     mkdir tmp && unzip -d ./tmp gradle.zip && \
     mv ./tmp/* gradle
-
-# Node.js
-RUN echo "[-] Download Node.js from nodejs.org" && \
-    wget -4 "${NODEJS_URL}" -O node.tar.xz && \
-    echo "[-] Verifying checksum..." && \
-    echo "${NODEJS_CHECKSUM}  node.tar.xz" | sha256sum -c - && \
-    echo "[-] Checksum OK" && \
-    mkdir node && tar -xvf node.tar.xz -C ./node --strip-components=1
 
 # -------------------------------------------------------------------------------------------------
 # WORKSPACE
@@ -127,10 +117,6 @@ ENV PATH=${PATH}:/home/friday/.local/bin/maven/bin
 # Setup Gradle
 COPY --chown=friday:friday --from=build /build/gradle /home/friday/.local/bin/gradle
 ENV PATH=${PATH}:/home/friday/.local/bin/gradle/bin
-
-# Setup Node.js
-COPY --chown=friday:friday --from=build /build/node /home/friday/.local/bin/node
-ENV PATH=${PATH}:/home/friday/.local/bin/node/bin
 
 # Setup SFW
 RUN npm i -g sfw
