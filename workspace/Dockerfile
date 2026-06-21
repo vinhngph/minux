@@ -9,6 +9,8 @@ ARG MAVEN_URL
 ARG MAVEN_CHECKSUM
 ARG GRADLE_URL
 ARG GRADLE_CHECKSUM
+ARG DENO_URL
+ARG DENO_CHECKSUM
 
 WORKDIR /build
 
@@ -39,6 +41,15 @@ RUN echo "[-] Download Gradle from gradle.org" && \
     echo "[-] Checksum OK" && \
     mkdir tmp && unzip -d ./tmp gradle.zip && \
     mv ./tmp/* gradle
+
+# Deno
+RUN echo "[-] Download Deno from github.com" && \
+    wget -4 "${DENO_URL}" -O deno.zip && \
+    echo "[-] Verifying checksum..." && \
+    echo "${DENO_CHECKSUM}  deno.zip" | sha256sum -c - && \
+    echo "[-] Checksum OK" && \
+    mkdir -p deno/bin && \
+    unzip -d deno/bin deno.zip
 
 # -------------------------------------------------------------------------------------------------
 # WORKSPACE
@@ -125,6 +136,11 @@ RUN ln -sf /home/friday/.local/opt/maven/bin/mvnyjp /home/friday/.local/bin/mvny
 COPY --chown=friday:friday --from=build /build/gradle /home/friday/.local/opt/gradle
 RUN ln -sf /home/friday/.local/opt/gradle/bin/gradle /home/friday/.local/bin/gradle
 
+# Setup Deno
+COPY --chown=friday:friday --from=build /build/deno /home/friday/.local/opt/deno
+RUN ln -sf /home/friday/.local/opt/deno/bin/deno /home/friday/.local/bin/deno
+RUN mkdir -p /home/friday/.deno/bin
+
 # Setup SFW
 RUN npm i -g sfw
 
@@ -138,6 +154,7 @@ ENV XDG_RUNTIME_DIR=/run/user/1000 \
 
 COPY --chown=friday:friday .vimrc /home/friday
 COPY --chown=friday:friday .bashrc /home/friday
+COPY --chown=friday:friday .profile /home/friday
 
 
 RUN mkdir /home/friday/.ssh && \
