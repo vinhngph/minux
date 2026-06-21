@@ -142,7 +142,7 @@ RUN ln -sf /home/friday/.local/opt/deno/bin/deno /home/friday/.local/bin/deno
 RUN mkdir -p /home/friday/.deno/bin
 
 # Setup SFW
-RUN npm i -g sfw
+RUN ./home/friday/.local/opt/deno/bin/deno install -g npm:sfw
 
 # Setup Rust
 RUN rustup default stable
