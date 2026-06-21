@@ -1,9 +1,7 @@
 #!/bin/bash
 podman run -d \
     -p 2222:22 \
-    -v workspace-ssh:/home/friday/.ssh \
-    -v workspace-gpg:/home/friday/.gnupg \
-    -v workspace-workspace:/home/friday/workspace \
+    -v friday:/home/friday/ \
     --device nvidia.com/gpu=all \
     --network workspace \
     --name workspace \
