@@ -106,17 +106,24 @@ RUN echo "Defaults    timestamp_timeout=0" > /etc/sudoers.d/90-custom-sudoers
 
 USER friday
 
+# Crate opt and bin directory
+RUN mkdir -p /home/friday/.local/opt
+RUN mkdir -p /home/friday/.local/bin
+
 # Setup Golang
-COPY --chown=friday:friday --from=build /build/go /home/friday/.local/bin/go
-ENV PATH=${PATH}:/home/friday/.local/bin/go/bin
+COPY --chown=friday:friday --from=build /build/go /home/friday/.local/opt/go
+RUN ln -sf /home/friday/.local/opt/go/bin/go /home/friday/.local/bin/go
+RUN ln -sf /home/friday/.local/opt/go/bin/gofmt /home/friday/.local/bin/gofmt
 
 # Setup Maven
-COPY --chown=friday:friday --from=build /build/maven /home/friday/.local/bin/maven
-ENV PATH=${PATH}:/home/friday/.local/bin/maven/bin
+COPY --chown=friday:friday --from=build /build/maven /home/friday/.local/opt/maven
+RUN ln -sf /home/friday/.local/opt/maven/bin/mvn /home/friday/.local/bin/mvn
+RUN ln -sf /home/friday/.local/opt/maven/bin/mvnDebug /home/friday/.local/bin/mvnDebug
+RUN ln -sf /home/friday/.local/opt/maven/bin/mvnyjp /home/friday/.local/bin/mvnyjp
 
 # Setup Gradle
-COPY --chown=friday:friday --from=build /build/gradle /home/friday/.local/bin/gradle
-ENV PATH=${PATH}:/home/friday/.local/bin/gradle/bin
+COPY --chown=friday:friday --from=build /build/gradle /home/friday/.local/opt/gradle
+RUN ln -sf /home/friday/.local/opt/gradle/bin/gradle /home/friday/.local/bin/gradle
 
 # Setup SFW
 RUN npm i -g sfw
